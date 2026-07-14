@@ -527,10 +527,16 @@ function Cell() {
 }
 
 function Rig() {
-  useFrame(({ clock, camera }) => {
+  useFrame(({ clock, camera, size }) => {
     const t = clock.getElapsedTime();
     const a = Math.sin(t * 0.08) * 0.16;
-    camera.position.set(4.9 * Math.cos(a * 0.4), 2.55 + Math.sin(t * 0.06) * 0.1, 5.45 + Math.sin(a) * 0.55);
+    /* pull back on narrow (portrait) viewports so the cell isn't cropped */
+    const f = Math.min(1.55, Math.max(1, (1.15 * size.height) / size.width));
+    camera.position.set(
+      4.9 * f * Math.cos(a * 0.4),
+      (2.55 + Math.sin(t * 0.06) * 0.1) * (0.8 + 0.2 * f),
+      (5.45 + Math.sin(a) * 0.55) * f
+    );
     camera.lookAt(0.7, 0.68, 0.08);
   });
   return null;

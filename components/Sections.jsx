@@ -21,28 +21,44 @@ export function Reveal({ children, delay = 0 }) {
 }
 
 export function Navbar() {
-  const { t, lang, toggle } = useLang();
+  const { t, lang, choose } = useLang();
+  const [open, setOpen] = useState(false);
+  const links = [
+    ["#process", t.nav.process],
+    ["#funding", t.nav.funding],
+    ["#team", t.nav.team],
+    ["#faq", t.nav.faq],
+    ["#contact", t.nav.contact],
+  ];
   return (
     <nav>
       <div className="wrap nav-inner">
         <a className="brand" href="#top"><span className="brand-mark" />{site.name}</a>
         <div className="nav-links">
-          <a href="#process">{t.nav.process}</a>
-          <a href="#funding">{t.nav.funding}</a>
-          <a href="#team">{t.nav.team}</a>
-          <a href="#faq">{t.nav.faq}</a>
-          <a href="#contact">{t.nav.contact}</a>
+          {links.map(([href, label]) => <a key={href} href={href}>{label}</a>)}
         </div>
-        <button className="lang-toggle" onClick={toggle} aria-label="Switch language">
-          {["hr", "en", "it"].map((l, i) => (
-            <span key={l}>
-              {i > 0 && " / "}
-              {lang === l ? <b>{l.toUpperCase()}</b> : l.toUpperCase()}
-            </span>
+        <div className="lang-toggle" role="group" aria-label="Language">
+          {["hr", "en", "it"].map((l) => (
+            <button key={l} className={lang === l ? "on" : ""} onClick={() => choose(l)} aria-pressed={lang === l}>
+              {l.toUpperCase()}
+            </button>
           ))}
-        </button>
+        </div>
         <a className="nav-cta" href="#contact">{t.nav.cta}</a>
+        <button className="nav-burger" aria-label="Menu" aria-expanded={open} onClick={() => setOpen((o) => !o)}>
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            {open ? <path d="M4.5 4.5l11 11M15.5 4.5l-11 11" /> : <path d="M2.5 5.5h15M2.5 10h15M2.5 14.5h15" />}
+          </svg>
+        </button>
       </div>
+      {open && (
+        <div className="nav-menu">
+          {links.map(([href, label]) => (
+            <a key={href} href={href} onClick={() => setOpen(false)}>{label}</a>
+          ))}
+          <a className="menu-cta" href="#contact" onClick={() => setOpen(false)}>{t.nav.cta}</a>
+        </div>
+      )}
     </nav>
   );
 }
