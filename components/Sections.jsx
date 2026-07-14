@@ -34,7 +34,12 @@ export function Navbar() {
           <a href="#contact">{t.nav.contact}</a>
         </div>
         <button className="lang-toggle" onClick={toggle} aria-label="Switch language">
-          {lang === "hr" ? <><b>HR</b> / EN</> : <>HR / <b>EN</b></>}
+          {["hr", "en", "it"].map((l, i) => (
+            <span key={l}>
+              {i > 0 && " / "}
+              {lang === l ? <b>{l.toUpperCase()}</b> : l.toUpperCase()}
+            </span>
+          ))}
         </button>
         <a className="nav-cta" href="#contact">{t.nav.cta}</a>
       </div>

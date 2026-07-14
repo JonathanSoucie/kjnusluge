@@ -36,7 +36,7 @@ const lerp3 = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, 
 /* pick height = cup lips just kissing the carton top (belt top 0.45 + box 0.22) */
 const PICK = [1.5, 0.658, -0.85];
 const HOVER_P = [1.5, 1.3, -0.85];
-const T_GRIP = 1.05, T_RELEASE = 4.7;
+const T_GRIP = 1.05, T_RELEASE = 4.7, T_NEXT = 7.5;
 const SLOTS = [
   [1.19, 0.36, 0.89], [1.51, 0.36, 0.89],
   [1.19, 0.36, 1.21], [1.51, 0.36, 1.21],
@@ -169,7 +169,7 @@ function Cell() {
   const beltLines = useRef([]);
   const boxes = useRef([]);
   const state = useRef({
-    prev: 0, slot: 0, carried: -1,
+    prev: 0, slot: 0, carried: -1, speed: 0, beltPos: 0,
     st: [
       { s: "conv", x: 1.55 }, { s: "conv", x: 2.25 }, { s: "conv", x: 2.95 },
       { s: "conv", x: 3.65 }, { s: "conv", x: 4.35 },
@@ -190,6 +190,10 @@ function Cell() {
       const p = SLOTS[S.slot];
       S.st[S.carried] = { s: "placed", x: p[0], z: p[2] };
       S.carried = -1;
+    }
+    /* advance to the next slot only after the arm is clear of the pallet —
+       switching at release made the arm's hover target jump sideways */
+    if (crossed(T_NEXT)) {
       S.slot = (S.slot + 1) % 4;
       if (S.slot === 0) {
         let fx = 4.4;
@@ -214,15 +218,21 @@ function Cell() {
       ledMat.current.emissiveIntensity = vac ? 1.7 : 0.55;
     }
 
-    /* belt lacing seams travel with the belt (belt runs toward -X at 0.5 m/s) */
+    /* belt indexing: run until the lead box reaches the photo-eye stop, then halt */
+    const order = S.st.map((b, i) => ({ b, i })).filter(o => o.b.s === "conv").sort((a, c) => a.b.x - c.b.x);
+    const running = !order.length || order[0].b.x > 1.56;
+    S.speed += ((running ? 0.5 : 0) - S.speed) * Math.min(1, dt * 6);
+    if (S.speed < 0.004) S.speed = 0;
+    S.beltPos += S.speed * dt;
+
+    let minX = 1.55;
+    order.forEach(({ b }) => { b.x = Math.max(minX, b.x - dt * S.speed); minX = b.x + 0.62; });
+
+    /* belt lacing seams move with the belt, so the belt visibly stops with the boxes */
     const span = 2.1;
     beltLines.current.forEach((m, i) => {
-      if (m) m.position.x = 1.35 + ((((i * span) / 6 - t * 0.5) % span) + span) % span;
+      if (m) m.position.x = 1.35 + ((((i * span) / 6 - S.beltPos) % span) + span) % span;
     });
-
-    const order = S.st.map((b, i) => ({ b, i })).filter(o => o.b.s === "conv").sort((a, c) => a.b.x - c.b.x);
-    let minX = 1.55;
-    order.forEach(({ b }) => { b.x = Math.max(minX, b.x - dt * 0.5); minX = b.x + 0.62; });
 
     S.st.forEach((b, i) => {
       const m = boxes.current[i]; if (!m) return;
