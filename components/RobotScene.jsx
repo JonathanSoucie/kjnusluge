@@ -159,8 +159,7 @@ function ConveyorLeg({ h = 0.36, w = 0.56, ...props }) {
   );
 }
 
-const IDLER_XS = [1.8, 2.35, 2.9];
-const GRAV_XS = Array.from({ length: 14 }, (_, i) => 3.72 + i * 0.22);
+const IDLER_XS = [1.8, 2.35, 2.9, 3.45, 4.0, 4.55, 5.1, 5.65, 6.2];
 
 function Cell() {
   const yawR = useRef(), shR = useRef(), elR = useRef(), wrR = useRef();
@@ -229,9 +228,9 @@ function Cell() {
     order.forEach(({ b }) => { b.x = Math.max(minX, b.x - dt * S.speed); minX = b.x + 0.62; });
 
     /* belt lacing seams move with the belt, so the belt visibly stops with the boxes */
-    const span = 2.1;
+    const span = 5.6;
     beltLines.current.forEach((m, i) => {
-      if (m) m.position.x = 1.35 + ((((i * span) / 6 - S.beltPos) % span) + span) % span;
+      if (m) m.position.x = 1.35 + ((((i * span) / 10 - S.beltPos) % span) + span) % span;
     });
 
     S.st.forEach((b, i) => {
@@ -353,23 +352,23 @@ function Cell() {
       {/* ---- belt conveyor (drums, idlers, motor) ---- */}
       <group>
         {/* belt: top run + return run */}
-        <mesh position={[2.4, 0.44, -0.85]} receiveShadow>
-          <boxGeometry args={[2.2, 0.02, 0.56]} />
+        <mesh position={[4.15, 0.44, -0.85]} receiveShadow>
+          <boxGeometry args={[5.7, 0.02, 0.56]} />
           <meshStandardMaterial color={BELT} roughness={0.88} />
         </mesh>
-        <mesh position={[2.4, 0.36, -0.85]}>
-          <boxGeometry args={[2.2, 0.012, 0.56]} />
+        <mesh position={[4.15, 0.36, -0.85]}>
+          <boxGeometry args={[5.7, 0.012, 0.56]} />
           <meshStandardMaterial color={"#1f2b3e"} roughness={0.9} />
         </mesh>
         {/* travelling lacing seams — sells the belt motion */}
-        {Array.from({ length: 6 }).map((_, i) => (
-          <mesh key={i} ref={(el) => (beltLines.current[i] = el)} position={[1.35 + i * 0.35, 0.4515, -0.85]}>
+        {Array.from({ length: 10 }).map((_, i) => (
+          <mesh key={i} ref={(el) => (beltLines.current[i] = el)} position={[1.35 + i * 0.56, 0.4515, -0.85]}>
             <boxGeometry args={[0.022, 0.004, 0.55]} />
             <meshStandardMaterial color="#1a2739" roughness={0.9} />
           </mesh>
         ))}
         {/* head & tail drums */}
-        {[1.3, 3.5].map((x) => (
+        {[1.3, 7.0].map((x) => (
           <mesh key={x} position={[x, 0.402, -0.85]} rotation={[Math.PI / 2, 0, 0]} castShadow>
             <cylinderGeometry args={[0.048, 0.048, 0.6, 28]} />{steelMat}
           </mesh>
@@ -382,12 +381,12 @@ function Cell() {
         ))}
         {/* side plates */}
         {[-1, 1].map((s) => (
-          <mesh key={s} position={[2.4, 0.405, -0.85 + s * 0.337]} castShadow>
-            <boxGeometry args={[2.36, 0.1, 0.024]} />{darkMat}
+          <mesh key={s} position={[4.15, 0.405, -0.85 + s * 0.337]} castShadow>
+            <boxGeometry args={[5.86, 0.1, 0.024]} />{darkMat}
           </mesh>
         ))}
         {/* drum shaft caps + idler bearing bolts on the plate faces */}
-        {[1.3, 3.5].flatMap((x) => [-1, 1].map((s) => (
+        {[1.3, 7.0].flatMap((x) => [-1, 1].map((s) => (
           <mesh key={`d${x}${s}`} position={[x, 0.402, -0.85 + s * 0.353]} rotation={[Math.PI / 2, 0, 0]}>
             <cylinderGeometry args={[0.022, 0.022, 0.016, 6]} />{steelMat}
           </mesh>
@@ -411,9 +410,9 @@ function Cell() {
           <mesh position={[0, 0.08, 0.12]}><boxGeometry args={[0.05, 0.03, 0.06]} />{capMat}</mesh>
         </group>
         {/* legs */}
-        <ConveyorLeg position={[1.7, 0, -0.85]} />
-        <ConveyorLeg position={[2.55, 0, -0.85]} />
-        <ConveyorLeg position={[3.4, 0, -0.85]} />
+        {[1.7, 2.8, 3.9, 5.0, 6.1, 6.9].map((x) => (
+          <ConveyorLeg key={x} position={[x, 0, -0.85]} />
+        ))}
         {/* photo-eye pair at the pick point */}
         {[-1, 1].map((s) => (
           <group key={s} position={[1.34, 0, -0.85 + s * 0.358]}>
@@ -425,38 +424,6 @@ function Cell() {
             </mesh>
           </group>
         ))}
-      </group>
-
-      {/* ---- gravity roller infeed section ---- */}
-      <group>
-        {/* transition plate off the tail drum */}
-        <mesh position={[3.6, 0.446, -0.85]}>
-          <boxGeometry args={[0.1, 0.008, 0.56]} />{steelMat}
-        </mesh>
-        {/* side rails */}
-        {[-1, 1].map((s) => (
-          <mesh key={s} position={[5.22, 0.435, -0.85 + s * 0.31]} castShadow>
-            <boxGeometry args={[3.16, 0.06, 0.02]} />{darkMat}
-          </mesh>
-        ))}
-        {/* rollers with through-shafts */}
-        {GRAV_XS.map((x) => (
-          <group key={x} position={[x, 0.42, -0.85]} rotation={[Math.PI / 2, 0, 0]}>
-            <mesh castShadow>
-              <cylinderGeometry args={[0.03, 0.03, 0.56, 22]} />{rollerMat}
-            </mesh>
-            <mesh>
-              <cylinderGeometry args={[0.008, 0.008, 0.66, 8]} />{steelMat}
-            </mesh>
-          </group>
-        ))}
-        {/* end stop */}
-        <mesh position={[6.74, 0.47, -0.85]} castShadow>
-          <boxGeometry args={[0.025, 0.09, 0.64]} />
-          <meshStandardMaterial color="#e0862e" roughness={0.6} />
-        </mesh>
-        <ConveyorLeg h={0.39} position={[4.0, 0, -0.85]} />
-        <ConveyorLeg h={0.39} position={[6.5, 0, -0.85]} />
       </group>
 
       {/* ---- pallet (slatted deck, stringers, bottom boards) ---- */}
