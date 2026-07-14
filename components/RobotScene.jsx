@@ -537,7 +537,7 @@ function Rig() {
       (2.55 + Math.sin(t * 0.06) * 0.1) * (0.8 + 0.2 * f),
       (5.45 + Math.sin(a) * 0.55) * f
     );
-    camera.lookAt(0.25, 0.68, 0.08);
+    camera.lookAt(-0.45, 0.68, 0.08);
   });
   return null;
 }
