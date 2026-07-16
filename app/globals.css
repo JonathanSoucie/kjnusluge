@@ -43,7 +43,8 @@ nav {
 }
 .nav-inner { display: flex; align-items: center; gap: 26px; height: 64px; }
 .brand { font-weight: 700; font-size: 17px; color: var(--ink); text-decoration: none; display: flex; align-items: center; gap: 10px; }
-.brand-mark { width: 10px; height: 10px; background: var(--accent); }
+.brand-logo { height: 36px; width: auto; display: block; }
+.foot-logo { height: 28px; }
 .nav-links { display: flex; gap: 22px; margin-left: auto; }
 .nav-links a { color: var(--muted); text-decoration: none; font-size: 14px; font-weight: 500; }
 .nav-links a:hover { color: var(--ink); }

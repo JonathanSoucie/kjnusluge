@@ -33,7 +33,7 @@ export function Navbar() {
   return (
     <nav>
       <div className="wrap nav-inner">
-        <a className="brand" href="#top"><span className="brand-mark" />{site.name}</a>
+        <a className="brand" href="#top"><img className="brand-logo" src="/praxes-logo-dark.png" alt={site.name} /></a>
         <div className="nav-links">
           {links.map(([href, label]) => <a key={href} href={href}>{label}</a>)}
         </div>
@@ -285,7 +285,7 @@ export function Footer() {
   return (
     <footer>
       <div className="wrap foot-inner">
-        <span className="brand"><span className="brand-mark" />{site.name}</span>
+        <span className="brand"><img className="brand-logo foot-logo" src="/praxes-logo-dark.png" alt={site.name} /></span>
         <span>© {new Date().getFullYear()} {site.name} · {t.footer.rights}</span>
       </div>
     </footer>
